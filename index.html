@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>📬 Gmail Inbox Viewer</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 32px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 16px; }
+    th, td { padding: 8px 10px; border: 1px solid #ddd; }
+    th { background: #f5f5f5; text-align: left; }
+    .actions { margin: 12px 0; }
+  </style>
+</head>
+<body>
+  <h1>📬 Gmail Inbox Viewer</h1>
+  <div class="actions">
+    <a href="/authorize">🔐 Authorize Gmail</a>
+    <button onclick="fetchEmails()">🔄 Refresh</button>
+  </div>
+  <table id="emailTable">
+    <thead>
+      <tr><th>From</th><th>Subject</th><th>Date</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function fetchEmails() {
+      const res = await fetch('/emails');
+      if (!res.ok) {
+        const msg = await res.text();
+        alert(msg);
+        return;
+      }
+      const data = await res.json();
+      const tbody = document.querySelector('#emailTable tbody');
+      tbody.innerHTML = '';
+      data.forEach(e => {
+        const tr = document.createElement('tr');
+        const dt = e.date ? new Date(e.date).toLocaleString() : '';
+        tr.innerHTML = `<td>${e.from}</td><td>${e.subject}</td><td>${dt}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+  </script>
+</body>
+</html>
