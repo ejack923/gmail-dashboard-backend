@@ -7,7 +7,7 @@ const app = express();
 const port = process.env.PORT || 8080;
 
 const CREDENTIALS_PATH = path.join(__dirname, 'credentials.json');
-const TOKEN_PATH = path.join(__dirname, 'token.json');
+const TOKEN_PATH = process.env.TOKEN_PATH || path.join(__dirname, 'token.json');
 
 // Serve static front-end
 app.use(express.static(__dirname));
