@@ -1,65 +1,18 @@
 [
-  {
-    "name": "LACW",
-    "keywords": [
-      "lacw.org.au",
-      "Law and Advocacy Centre for Women"
-    ]
-  },
-  {
-    "name": "Orenstein",
-    "keywords": [
-      "orensteinlaw.com",
-      "Orenstein"
-    ]
-  },
-  {
-    "name": "Chase Murphy Lawyers",
-    "keywords": [
-      "chasemurphylawyers.com.au",
-      "Chase Murphy"
-    ]
-  },
-  {
-    "name": "Kilburn Lawyers",
-    "keywords": [
-      "kilburnlawyers.com.au",
-      "Kilburn Lawyers"
-    ]
-  },
-  {
-    "name": "VALS",
-    "keywords": [
-      "vals.org.au",
-      "Victorian Aboriginal Legal Service"
-    ]
-  },
-  {
-    "name": "Robyn Greensill and Associates",
-    "keywords": [
-      "greensilllaw.com",
-      "Robyn Greensill"
-    ]
-  },
-  {
-    "name": "Taylor Rose",
-    "keywords": [
-      "taylor-rose.com",
-      "Taylor Rose"
-    ]
-  },
-  {
-    "name": "Cao and Co",
-    "keywords": [
-      "caoandco.com",
-      "Cao and Co"
-    ]
-  },
-  {
-    "name": "Richard Revill Lawyers",
-    "keywords": [
-      "richardrevilllaw.com",
-      "Richard Revill"
-    ]
-  }
+  { "name": "LACW", "keywords": ["lacw.org.au", "Law and Advocacy Centre for Women"] },
+  { "name": "Orenstein", "keywords": ["orenstein"] },
+  { "name": "Chase Murphy Lawyers", "keywords": ["chasemurphylawyers.com.au", "Chase Murphy"] },
+  { "name": "Kilburn Lawyers", "keywords": ["kilburnlawyers", "kilburn lawyers"] },
+
+  { "name": "Cao and Co", "keywords": ["cao and co", "cao & co", "cao&co", "caoandco"] },
+
+  { "name": "Robyn Greensill and Associates", "keywords": ["greensill"] },
+  { "name": "Taylor Rose", "keywords": ["taylor rose", "taylorrose"] },
+  { "name": "Richard Revill Lawyers", "keywords": ["richard revill", "revilllawyers", "revill lawyers"] },
+
+  { "name": "Parnells Barristers", "keywords": ["parnellsbarristers.com.au", "parnells barristers"] },
+
+  { "name": "VALS", "keywords": ["vals.org.au", "Victorian Aboriginal Legal Service"] },
+
+  { "name": "VLA (Victoria Legal Aid)", "keywords": ["vla.vic.gov.au", "atlas@vla.vic.gov.au", "ATLAS No Reply", "Victoria Legal Aid"] }
 ]
