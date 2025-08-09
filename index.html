@@ -1,47 +1,138 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <title>📬 Gmail Inbox Viewer</title>
+  <meta charset="utf-8" />
+  <title>Inbox Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: Arial, sans-serif; margin: 32px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 16px; }
-    th, td { padding: 8px 10px; border: 1px solid #ddd; }
-    th { background: #f5f5f5; text-align: left; }
-    .actions { margin: 12px 0; }
+    body{font-family:system-ui,Arial,sans-serif;max-width:1100px;margin:24px auto;padding:0 16px}
+    header{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
+    button, a.btn{padding:8px 12px;border:1px solid #ccc;background:#f8f8f8;border-radius:8px;text-decoration:none;color:#111;cursor:pointer}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .card{border:1px solid #eee;border-radius:12px;padding:12px}
+    h2{margin:8px 0 12px;font-size:18px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:6px 8px;border-bottom:1px solid #eee;text-align:left;font-size:14px}
+    .pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#eee;font-size:12px;margin-left:6px}
+    .muted{color:#666;font-size:12px}
+    #status{margin:8px 0 16px;color:#666}
   </style>
 </head>
 <body>
-  <h1>📬 Gmail Inbox Viewer</h1>
-  <div class="actions">
-    <a href="/authorize">🔐 Authorize Gmail</a>
-    <button onclick="fetchEmails()">🔄 Refresh</button>
+  <header>
+    <h1>📬 Inbox Dashboard</h1>
+    <div>
+      <a class="btn" href="/authorize">🔐 Authorize Gmail</a>
+      <button id="refresh">🔄 Refresh</button>
+    </div>
+  </header>
+
+  <div id="status" class="muted">Ready.</div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Summary</h2>
+      <div id="summaryBox" class="muted">Loading…</div>
+    </div>
+
+    <div class="card">
+      <h2>Search</h2>
+      <form id="searchForm">
+        <input id="q" placeholder="invoice, statement, Cao & Co…" style="width:70%;padding:8px;border:1px solid #ccc;border-radius:8px">
+        <button type="submit">Search</button>
+      </form>
+      <div id="searchBox" class="muted" style="margin-top:8px;">Try searching “invoice”.</div>
+    </div>
   </div>
-  <table id="emailTable">
-    <thead>
-      <tr><th>From</th><th>Subject</th><th>Date</th></tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+
+  <div class="card" style="margin-top:16px;">
+    <h2>By Client</h2>
+    <div id="groups"></div>
+  </div>
 
   <script>
-    async function fetchEmails() {
-      const res = await fetch('/emails');
-      if (!res.ok) {
-        const msg = await res.text();
-        alert(msg);
-        return;
-      }
-      const data = await res.json();
-      const tbody = document.querySelector('#emailTable tbody');
-      tbody.innerHTML = '';
-      data.forEach(e => {
-        const tr = document.createElement('tr');
-        const dt = e.date ? new Date(e.date).toLocaleString() : '';
-        tr.innerHTML = `<td>${e.from}</td><td>${e.subject}</td><td>${dt}</td>`;
-        tbody.appendChild(tr);
-      });
+    const api = ''; // same-origin
+
+    const el = (sel) => document.querySelector(sel);
+
+    async function fetchJSON(path){
+      const r = await fetch(path);
+      if(!r.ok){ throw new Error(await r.text()); }
+      return r.json();
     }
+
+    function renderSummary(data){
+      const by = data.byClient || {};
+      const items = Object.entries(by)
+        .sort((a,b)=>b[1]-a[1])
+        .map(([name,count]) => `<span class="pill">${name}: ${count}</span>`)
+        .join(' ');
+      el('#summaryBox').innerHTML = `Total: <b>${data.total}</b><div style="margin-top:6px">${items||'<span class="muted">No emails.</span>'}</div>`;
+    }
+
+    function renderGroups(grouped){
+      const html = Object.entries(grouped)
+        .sort((a,b)=>b[1].length - a[1].length)
+        .map(([client, items]) => {
+          const rows = items.map(m => `
+            <tr>
+              <td style="width:32%">${m.subject||'(no subject)'}</td>
+              <td style="width:28%">${m.from||''}</td>
+              <td style="width:18%"><span class="muted">${m.date||''}</span></td>
+              <td>${m.snippet||''}</td>
+            </tr>`).join('');
+          return `
+            <details open>
+              <summary><b>${client}</b> <span class="pill">${items.length}</span></summary>
+              <table>${rows}</table>
+            </details>
+          `;
+        }).join('');
+      el('#groups').innerHTML = html || '<div class="muted">No groups to show.</div>';
+    }
+
+    async function loadAll(){
+      try{
+        el('#status').textContent = 'Loading…';
+        const [summary, grouped] = await Promise.all([
+          fetchJSON('/inbox/summary'),
+          fetchJSON('/inbox/by-client')
+        ]);
+        renderSummary(summary);
+        renderGroups(grouped);
+        el('#status').textContent = 'Done.';
+      }catch(err){
+        el('#status').textContent = 'Error: ' + err.message;
+      }
+    }
+
+    async function doSearch(q){
+      el('#searchBox').textContent = 'Searching…';
+      try{
+        const r = await fetchJSON('/emails'); // simple demo: search client-side
+        const ql = (q||'').toLowerCase();
+        const hits = r.filter(e =>
+          (e.subject||'').toLowerCase().includes(ql) ||
+          (e.snippet||'').toLowerCase().includes(ql) ||
+          (e.from||'').toLowerCase().includes(ql)
+        );
+        el('#searchBox').innerHTML = hits.length
+          ? `<div class="muted">${hits.length} result(s)</div><ul>${hits.map(h=>`<li><b>${h.subject||'(no subject)'}</b> — ${h.from||''}</li>`).join('')}</ul>`
+          : '<span class="muted">No results.</span>';
+      }catch(e){
+        el('#searchBox').textContent = 'Search failed: ' + e.message;
+      }
+    }
+
+    // Events
+    el('#refresh').addEventListener('click', loadAll);
+    el('#searchForm').addEventListener('submit', (ev)=>{
+      ev.preventDefault();
+      doSearch(el('#q').value);
+    });
+
+    // initial load
+    loadAll();
   </script>
 </body>
 </html>
