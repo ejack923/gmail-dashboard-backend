@@ -1,18 +1,32 @@
-[
-  { "name": "LACW", "keywords": ["lacw.org.au", "Law and Advocacy Centre for Women"] },
-  { "name": "Orenstein", "keywords": ["orenstein"] },
-  { "name": "Chase Murphy Lawyers", "keywords": ["chasemurphylawyers.com.au", "Chase Murphy"] },
-  { "name": "Kilburn Lawyers", "keywords": ["kilburnlawyers", "kilburn lawyers"] },
-
-  { "name": "Cao and Co", "keywords": ["cao and co", "cao & co", "cao&co", "caoandco"] },
-
-  { "name": "Robyn Greensill and Associates", "keywords": ["greensill"] },
-  { "name": "Taylor Rose", "keywords": ["taylor rose", "taylorrose"] },
-  { "name": "Richard Revill Lawyers", "keywords": ["richard revill", "revilllawyers", "revill lawyers"] },
-
-  { "name": "Parnells Barristers", "keywords": ["parnellsbarristers.com.au", "parnells barristers"] },
-
-  { "name": "VALS", "keywords": ["vals.org.au", "Victorian Aboriginal Legal Service"] },
-
-  { "name": "VLA (Victoria Legal Aid)", "keywords": ["vla.vic.gov.au", "atlas@vla.vic.gov.au", "ATLAS No Reply", "Victoria Legal Aid"] }
-]
+{
+  "LACW": [
+    "lacw.org.au",
+    "Law and Advocacy Centre for Women"
+  ],
+  "Orenstein": [
+    "orenstein"
+  ],
+  "Chase Murphy Lawyers": [
+    "chasemurphylawyers.com.au"
+  ],
+  "Kilburn Lawyers": [
+    "kilburn"
+  ],
+  "VALS": [
+    "vals.org.au",
+    "Victoria Aboriginal Legal Service"
+  ],
+  "Robyn Greensill and Associates": [
+    "greensill"
+  ],
+  "Taylor Rose": [
+    "taylorrose"
+  ],
+  "Cao and Co": [
+    "cao and co",
+    "cao & co"
+  ],
+  "Richard Revill Lawyers": [
+    "revill"
+  ]
+}
