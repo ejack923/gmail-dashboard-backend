@@ -1,3 +1,5 @@
+
+// index.js (merged with built-in client rules)
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -7,21 +9,37 @@ const app = express();
 app.use(express.static(__dirname));
 const PORT = process.env.PORT || 8080;
 
+// ----- config paths -----
 const CREDENTIALS_PATH = path.join(__dirname, 'credentials.json');
 const TOKEN_PATH = process.env.TOKEN_PATH || path.join(__dirname, 'token.json');
 const RULES_PATH = path.join(__dirname, 'rules.json');
 
-let CLIENT_RULES = [];
+// ----- default client rules (can be overridden by rules.json) -----
+const DEFAULT_RULES = [
+  { name: "LACW", keywords: ["@lacw.org.au", "Law and Advocacy Centre for Women", "LACW"] },
+  { name: "Orenstein", keywords: ["Orenstein"] },
+  { name: "Chase Murphy Lawyers", keywords: ["@chasemurphylawyers.com.au", "Chase Murphy"] },
+  { name: "Kilburn Lawyers", keywords: ["Kilburn"] },
+  { name: "VALS", keywords: ["VALS", "@vals.org.au", "Victorian Aboriginal Legal Service"] },
+  { name: "Robyn Greensill and Associates", keywords: ["Greensill"] },
+  { name: "Taylor Rose", keywords: ["Taylor Rose"] },
+  { name: "Cao and Co", keywords: ["Cao & Co", "Cao and Co", "@caoandco"] },
+  { name: "Richard Revill Lawyers", keywords: ["Richard Revill"] }
+];
+
+// ----- load rules: use rules.json if present, else fall back to defaults -----
+let CLIENT_RULES = DEFAULT_RULES;
 try {
   if (fs.existsSync(RULES_PATH)) {
     const raw = fs.readFileSync(RULES_PATH, 'utf-8');
     const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed)) CLIENT_RULES = parsed;
+    if (Array.isArray(parsed) && parsed.length) CLIENT_RULES = parsed;
   }
 } catch (e) {
-  console.warn('⚠️ Could not read/parse rules.json:', e.message);
+  console.warn('⚠️ Could not read/parse rules.json. Using defaults. Reason:', e.message);
 }
 
+// ----- helpers -----
 function getOAuthClient() {
   if (!fs.existsSync(CREDENTIALS_PATH)) {
     throw new Error('Missing credentials.json beside index.js');
@@ -57,10 +75,12 @@ function classifyEmail(email) {
   return 'Unassigned';
 }
 
+// ----- routes (UI) -----
 app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// ----- routes (OAuth) -----
 app.get('/authorize', (req, res) => {
   try {
     const oAuth2Client = getOAuthClient();
@@ -92,6 +112,7 @@ app.get('/oauth2callback', async (req, res) => {
   }
 });
 
+// ----- routes (API) -----
 app.get('/emails', async (_req, res) => {
   try {
     const auth = await ensureAuthedClient();
@@ -196,6 +217,7 @@ app.get('/inbox/summary', async (_req, res) => {
   }
 });
 
+// ----- start -----
 app.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
