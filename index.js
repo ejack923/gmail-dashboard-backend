@@ -5,12 +5,29 @@ const { google } = require('googleapis');
 
 const app = express();
 app.use(express.static(__dirname));
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 10000;
 
-const CREDENTIALS_PATH = path.join(__dirname, 'credentials.json');
-const TOKEN_PATH = process.env.TOKEN_PATH || path.join(__dirname, 'token.json');
+// ---- Paths (env -> /data -> local) -----------------------------------------
+const DEFAULT_CRED = '/data/credentials.json';
+const DEFAULT_TOKEN = '/data/token.json';
+
+const CREDENTIALS_PATH =
+  process.env.CREDENTIALS_PATH ||
+  (fs.existsSync(DEFAULT_CRED) ? DEFAULT_CRED : path.join(__dirname, 'credentials.json'));
+
+const TOKEN_PATH =
+  process.env.TOKEN_PATH || DEFAULT_TOKEN;
+
 const RULES_PATH = path.join(__dirname, 'rules.json');
 
+console.log('Using paths:', {
+  CREDENTIALS_PATH,
+  TOKEN_PATH,
+  RULES_PATH,
+  PORT
+});
+
+// ---- Load rules (optional) --------------------------------------------------
 let CLIENT_RULES = [];
 try {
   if (fs.existsSync(RULES_PATH)) {
@@ -22,9 +39,13 @@ try {
   console.warn('⚠️ Could not read/parse rules.json:', e.message);
 }
 
+// ---- Auth helpers -----------------------------------------------------------
 function getOAuthClient() {
   if (!fs.existsSync(CREDENTIALS_PATH)) {
-    throw new Error('Missing credentials.json beside index.js');
+    throw new Error(
+      `Missing credentials.json. Checked:\n- ${CREDENTIALS_PATH}\n- ${path.join(__dirname, 'credentials.json')}\n` +
+      `Tip: upload your OAuth Web client JSON to /data/credentials.json or set CREDENTIALS_PATH`
+    );
   }
   const content = JSON.parse(fs.readFileSync(CREDENTIALS_PATH, 'utf-8'));
   const { client_secret, client_id, redirect_uris } = content.web || content.installed || {};
@@ -57,6 +78,7 @@ function classifyEmail(email) {
   return 'Unassigned';
 }
 
+// ---- Routes -----------------------------------------------------------------
 app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -83,9 +105,13 @@ app.get('/oauth2callback', async (req, res) => {
     const oAuth2Client = getOAuthClient();
     const { tokens } = await oAuth2Client.getToken(code);
     oAuth2Client.setCredentials(tokens);
+
+    // Ensure folder (e.g., /data) exists
+    try { fs.mkdirSync(path.dirname(TOKEN_PATH), { recursive: true }); } catch {}
+
     fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens, null, 2));
-    res.send('✅ Authorization successful. Tokens saved.');
     console.log('✅ Token saved to', TOKEN_PATH);
+    res.send('✅ Authorization successful. Tokens saved.');
   } catch (e) {
     console.error('Token exchange error:', e);
     res.status(500).send('Error retrieving access token.');
@@ -197,6 +223,5 @@ app.get('/inbox/summary', async (_req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
-
